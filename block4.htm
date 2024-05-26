@@ -29,14 +29,24 @@
     let x, y, velocityX, velocityY
     let isAnimating = false
 
-    const rectX = (canvas.width) / 2 - 100
-    const rectY = (canvas.height) / 2 - 100
+    const planeX = (canvas.width) / 2 - 100
+    const planeY = (canvas.height) / 2 - 100
     const fallingPoint = canvas.height * 0.9
 
+    let cloudX = 0
+    let cloudY = 50 // adjust this to change the height of the cloud
+    let cloudSpeed = 4
+
     let bombImage = new Image()
-    let explosionImage = new Image()
     bombImage.src = "./assets/bomb.png"
+    let explosionImage = new Image()
     explosionImage.src = "./assets/boom2.png"
+    let boeing = new Image()
+    boeing.src = "./assets/combat_plane.png"
+    let smoke = new Image()
+    smoke.src = "./assets/smoke.png"
+    let cloud = new Image()
+    cloud.src = "./assets/cloud.png"
 
     function initializeBomb() {
       x = canvas.width / 2
@@ -45,19 +55,17 @@
       velocityY = 0
     }
 
-    function drawPlane() {
-      let boeing = new Image()
-      boeing.src = "./assets/combat_plane.png"
-      let smoke = new Image()
-
-      smoke.src = "./assets/smoke.png"
-      boeing.onload = function () {
-        gl.drawImage(smoke, -50, rectY)
-        gl.drawImage(boeing, rectX, rectY)
+    function drawCloud() {
+      gl.drawImage(cloud, cloudX, cloudY)
+      cloudX -= cloudSpeed
+      if (cloudX + cloud.width < 0) {
+        cloudX = canvas.width
       }
+    }
 
-      gl.drawImage(smoke, -50, rectY)
-      gl.drawImage(boeing, rectX, rectY)
+    function drawPlane() {
+      gl.drawImage(smoke, -50, planeY)
+      gl.drawImage(boeing, planeX, planeY)
     }
 
     function drawBomb() {
@@ -73,7 +81,6 @@
       gl.fillRect(0, 0, canvas.width, canvas.height * 0.75)
     }
 
-
     function drawSun() {
       gl.fillStyle = "#F5ED11"
       gl.beginPath()
@@ -84,6 +91,15 @@
     function drawGround() {
       gl.fillStyle = '#2C8533'
       gl.fillRect(0, canvas.height, canvas.width, -canvas.height * 0.25)
+    }
+
+    function animateSkyAndCloud() {
+      gl.clearRect(0, 0, canvas.width, canvas.height * 0.75) // clear only the sky part
+      drawSky()
+      drawCloud()
+      drawSun()
+      drawPlane()
+      requestAnimationFrame(animateSkyAndCloud)
     }
 
     function update() {
@@ -100,11 +116,8 @@
         isAnimating = false
         return
       }
-      gl.clearRect(0, 0, canvas.width, canvas.height)
+      gl.clearRect(0, canvas.height * 0.75, canvas.width, canvas.height * 0.25) // clear only the ground part
       drawGround()
-      drawSky()
-      drawSun()
-      drawPlane()
       if (y + radius < fallingPoint) {
         drawBomb()
       } else {
@@ -122,13 +135,15 @@
       }
     })
 
+    animateSkyAndCloud()
+
     initializeBomb()
     gl.clearRect(0, 0, canvas.width, canvas.height)
     drawGround()
     drawSky()
+    drawCloud()
     drawSun()
     drawPlane()
-    drawSmoke()
   </script>
 </body>
 
